@@ -47,7 +47,7 @@ type StateFn func(*Lexer) StateFn
 // lexer holds the state of the scanner.
 type Lexer struct {
 	name    string     // used only for error reports
-	input   string     // the string being scanned
+	Input   string     // the string being scanned
 	state   StateFn    // the next lexing function to enter
 	Start   int        // start position of this item
 	Pos     int        // current position in the input
@@ -60,7 +60,7 @@ type Lexer struct {
 func NewLexer(name, input string, startState StateFn) *Lexer {
 	l := &Lexer{
 		name:   name,
-		input:  input,
+		Input:  input,
 		state:  startState,
 		tokens: make(chan Token, 2), // two items sufficient
 	}
@@ -77,7 +77,7 @@ func (l *Lexer) run() {
 
 // LineNumber returns the line number of the current position within the input string.
 func (l *Lexer) LineNumber() int {
-	return strings.Count(l.input[:l.lastPos], "\n") + 1
+	return strings.Count(l.Input[:l.lastPos], "\n") + 1
 }
 
 // NextToken returns the next item from the input.
@@ -96,17 +96,17 @@ func (l *Lexer) NextToken() Token {
 
 // Emit passes an item back to the client
 func (l *Lexer) Emit(t TokenType) {
-	l.tokens <- Token{t, l.input[l.Start:l.Pos], l.Start}
+	l.tokens <- Token{t, l.Input[l.Start:l.Pos], l.Start}
 	l.Start = l.Pos
 }
 
 // Next returns the next rune in the input.
 func (l *Lexer) Next() rune {
-	if l.Pos >= len(l.input) {
+	if l.Pos >= len(l.Input) {
 		l.Width = 0
 		return EOF
 	}
-	r, w := utf8.DecodeRuneInString(l.input[l.Pos:])
+	r, w := utf8.DecodeRuneInString(l.Input[l.Pos:])
 	l.Width = w
 	l.Pos += l.Width
 	return r
